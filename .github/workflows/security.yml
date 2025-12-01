@@ -1,0 +1,105 @@
+name: 🛡️ DevSecOps & Governance
+
+on:
+  pull_request:
+    branches: [ "develop" ]
+
+permissions:
+  contents: read
+  pull-requests: read
+  security-events: write
+  actions: read
+
+jobs:
+  governance:
+    name: 👮 PR Title Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: 🎨 Validate Conventional Commits
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+
+  security:
+    name: 🛡️ Security Scans
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+  
+      - name: 🐷 TruffleHog OSS (Secrets Scan)
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --debug --only-verified
+
+     
+      - name: 🛡️ Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1' 
+
+      - name: 📡 Upload Trivy Scan Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy'
+
+    
+      - name: 🏗️ Run Checkov (IaC)
+        uses: bridgecrewio/checkov-action@master
+        continue-on-error: true # Soft Fail ativado
+        with:
+          directory: '.'
+          framework: terraform
+          output_format: sarif
+          download_external_modules: true
+
+      - name: 📡 Upload Checkov Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() 
+        continue-on-error: true
+        with:
+          sarif_file: 'results.sarif'
+          category: 'checkov'
+
+      - name: 🔍 Run Semgrep (SAST)
+        uses: returntocorp/semgrep-action@v1
+        continue-on-error: true
+        with:
+          config: p/default
+          generateSarif: "1"
+
+      - name: 📡 Upload Semgrep Results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        continue-on-error: true
+        with:
+          sarif_file: 'semgrep.sarif'
+          category: 'semgrep'
