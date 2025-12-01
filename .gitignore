@@ -1,0 +1,75 @@
+# Build outputs
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# ASP.NET Generated files
+wwwroot/lib/
+wwwroot/dist/
+wwwroot/node_modules/
+
+# Node (caso use front integrado)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+*.env
+.env.*
+
+# NuGet
+*.nupkg
+packages/
+*.snupkg
+.nuget/
+
+# Publish / artifacts
+publish/
+artifacts/
+
+# Temp
+*.tmp
+*.temp
+
+# Azure / Docker
+.publishsettings
+docker-compose.override.yml
+docker-compose.vs.debug.yml
+docker-compose.vs.release.yml
+
+# OS specifics
+.DS_Store
+Thumbs.db
+
+# Resharper
+_ReSharper*/
+*.DotSettings.user
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# Entity Framework
+migrations/ # se quiser versionar, remova isso
+
