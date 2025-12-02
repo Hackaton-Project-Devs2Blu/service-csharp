@@ -9,12 +9,12 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: us-west-2
-  
-  ECR_REPOSITORY: service-csharp-hackathon      
-  ECS_SERVICE: service-csharp          
-  ECS_CLUSTER: hackathon-project-cluster-hackathon 
-  CONTAINER_NAME: csharp-container
+      AWS_REGION: us-west-2
+      ECR_REPOSITORY: service-csharp-hackathon
+      ECS_SERVICE: service-csharp
+      ECS_CLUSTER: hackathon-project-cluster-hackathon
+      ECS_TASK_DEFINITION: csharp-task-hackathon 
+      CONTAINER_NAME: csharp-container
 
 jobs:
   deploy:
