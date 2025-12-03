@@ -51,7 +51,7 @@ jobs:
 
       - name: 📥 Download Task Definition
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.ECS_SERVICE }}-task-hackathon \
+          aws ecs describe-task-definition --task-definition ${{ env.ECS_TASK_DEFINITION }} \
           --query taskDefinition > task-definition.json
 
       - name: 📝 Update Task Definition
