@@ -1,4 +1,4 @@
-﻿namespace Patricia.ChatBot;
+﻿namespace Patricia.ChatBot.Controllers;
 
 using Microsoft.AspNetCore.Mvc;
 using Patricia.ChatBot.Dto;
