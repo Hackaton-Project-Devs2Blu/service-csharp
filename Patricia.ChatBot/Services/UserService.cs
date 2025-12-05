@@ -1,21 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Patricia.ChatBot.Dto;
 using Patricia.ChatBot.Entity;
+using Patricia.ChatBot.Repository;
 
 namespace Patricia.ChatBot.Services;
 
 public class UserService
 {
-    private readonly AppDbContext _db;
+    private readonly IUserRepository _repo;
 
-    public UserService(AppDbContext db)
+    public UserService(IUserRepository repo)
     {
-        _db = db;
+        _repo = repo;
     }
 
     public async Task<UserResponseDto> Create(UserRequestDto dto)
     {
-        if (await _db.Users.AnyAsync(u => u.Email == dto.Email))
+        var existingUser = await _repo.GetByEmail(dto.Email);
+        if (existingUser != null)
             throw new Exception("Email já cadastrado.");
 
         var user = new UserEntity
@@ -26,35 +28,50 @@ public class UserService
             SenhaHash = BCrypt.Net.BCrypt.HashPassword(dto.Senha)
         };
 
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
+        await _repo.Create(user);
 
         return ToResponse(user);
     }
 
     public async Task<List<UserResponseDto>> GetAll()
     {
-        var users = await _db.Users.ToListAsync();
+        var users = await _repo.GetAll();
         return users.Select(ToResponse).ToList();
     }
 
     public async Task<UserResponseDto?> GetById(long id)
     {
-        var user = await _db.Users.FindAsync(id);
+        var user = await _repo.GetById(id);
         return user is null ? null : ToResponse(user);
     }
 
     public async Task<bool> Delete(long id)
     {
-        var user = await _db.Users.FindAsync(id);
-        if (user is null) return false;
-
-        _db.Users.Remove(user);
-        await _db.SaveChangesAsync();
-        return true;
+        return await _repo.Delete(id);
     }
 
-    private UserResponseDto ToResponse(UserEntity u)
+    public async Task<LoginResponseDto> Login(LoginRequestDto dto)
+    {
+        var user = await _repo.GetByEmail(dto.Email);
+
+        if (user is null)
+            throw new Exception("Credenciais inválidas.");
+
+        var senhaOk = BCrypt.Net.BCrypt.Verify(dto.Senha, user.SenhaHash);
+
+        if (!senhaOk)
+            throw new Exception("Credenciais inválidas.");
+
+        return new LoginResponseDto
+        {
+            Id = user.Id,
+            Nome = user.Nome,
+            Email = user.Email,
+            IsAdmin = user.IsAdmin
+        };
+    }
+
+    private static UserResponseDto ToResponse(UserEntity u)
     {
         return new UserResponseDto
         {

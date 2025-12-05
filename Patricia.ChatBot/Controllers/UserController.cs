@@ -18,8 +18,29 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(UserRequestDto dto)
     {
-        var result = await _service.Create(dto);
-        return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+        try
+        {
+            var result = await _service.Create(dto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(LoginRequestDto dto)
+    {
+        try
+        {
+            var result = await _service.Login(dto);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return Unauthorized(new { error = ex.Message });
+        }
     }
 
     [HttpGet]
@@ -39,6 +60,6 @@ public class UsersController : ControllerBase
     public async Task<IActionResult> Delete(long id)
     {
         var deleted = await _service.Delete(id);
-        return deleted ? NoContent() : NotFound();
+        return deleted ? Ok() : NotFound();
     }
 }

@@ -1,7 +1,8 @@
 
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-// using Patricia.ChatBot.Services;
+using Patricia.ChatBot.Repository;
+using Patricia.ChatBot.Services;
 
 namespace Patricia.ChatBot
 {
@@ -15,13 +16,13 @@ namespace Patricia.ChatBot
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            // builder.Services.AddSingleton<GeminiService>();
-            // builder.Services.AddSingleton<DatasetService>();
+            builder.Services.AddSingleton<GeminiService>();
+            builder.Services.AddSingleton<DatasetService>();
+            builder.Services.AddScoped<UserService>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-            // builder.Services.AddDbContext<AppDbContext>(opt =>
-            //     opt.UseInMemoryDatabase("PatriciaChatBotDB"));
-
-            // builder.Services.AddScoped<UserService>();
+            builder.Services.AddDbContext<AppDbContext>(opt =>
+                opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
