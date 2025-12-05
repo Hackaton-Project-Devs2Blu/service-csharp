@@ -22,11 +22,13 @@ namespace Patricia.ChatBot
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             var connectionString =
-                $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
-                $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
-                $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
-                $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
-                $"Pooling=true;";
+                                "Host=db_ecs_fargate;" +
+                                "Port=5432;" +
+                                "Database=postgres;" +
+                                "Username=userdatabase;" +
+                                "Password=VeRyH4rdPa55w.rd**;" +
+                                "SSL Mode=Disable;";
+
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseNpgsql(builder.Configuration.GetConnectionString(connectionString)));
