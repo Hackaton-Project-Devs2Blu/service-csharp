@@ -27,7 +27,7 @@ namespace Patricia.ChatBot
                 "Database=db_ecs_fargate;" +
                 "Username=userdatabase;" +
                 "Password=VeRyH4rdPa55w.rd**;" +
-                "SSL Mode=Disable;";
+                "SSL Mode=Require;Trust Server Certificate=true;";
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
                 opt.UseNpgsql(connectionString)
