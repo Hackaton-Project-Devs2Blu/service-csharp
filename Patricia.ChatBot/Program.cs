@@ -24,13 +24,14 @@ namespace Patricia.ChatBot
             var connectionString =
                 "Host=hackathon-project-db-hackathon.cf21ln5uzado.us-west-2.rds.amazonaws.com;" +
                 "Port=5432;" +
-                "Database=postgres;" +
+                "Database=db_ecs_fargate;" +
                 "Username=userdatabase;" +
                 "Password=VeRyH4rdPa55w.rd**;" +
                 "SSL Mode=Disable;";
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
-                opt.UseNpgsql(builder.Configuration.GetConnectionString(connectionString)));
+                opt.UseNpgsql(connectionString)
+            );
 
             var app = builder.Build();
 
