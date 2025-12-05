@@ -21,8 +21,15 @@ namespace Patricia.ChatBot
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+            var connectionString =
+                $"Host={Environment.GetEnvironmentVariable("DB_HOST")};" +
+                $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
+                $"Username={Environment.GetEnvironmentVariable("DB_USER")};" +
+                $"Password={Environment.GetEnvironmentVariable("DB_PASSWORD")};" +
+                $"Pooling=true;";
+
             builder.Services.AddDbContext<AppDbContext>(opt =>
-                opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                opt.UseNpgsql(builder.Configuration.GetConnectionString(connectionString)));
 
             var app = builder.Build();
 
