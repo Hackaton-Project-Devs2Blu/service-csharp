@@ -10,7 +10,7 @@ public class GeminiService
 
     public GeminiService(IConfiguration config)
     {
-        _apiKey = "AIzaSyCtuQHu-Ty2DiRV-b3pIy1v7Huf-9j53Sk"; //  config["GEMINI_API_KEY"] ?? throw new Exception("GEMINI_API_KEY não configurada.");
+        _apiKey = config["GEMINI_API_KEY"] ?? throw new Exception("GEMINI_API_KEY não configurada.");
     }
 
     public async Task<string> GenerateAsync(string prompt)
