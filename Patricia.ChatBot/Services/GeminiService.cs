@@ -1,25 +1,22 @@
-﻿using System.Net.Http.Json;
+﻿using System.Text;
 using System.Text.Json;
 
 namespace Patricia.ChatBot.Services;
 
 public class GeminiService
 {
-    private readonly HttpClient _http = new();
+    private readonly HttpClient _http;
     private readonly string _apiKey;
 
-    public GeminiService(IConfiguration config)
+    public GeminiService(HttpClient http, IConfiguration config)
     {
+        _http = http;
         _apiKey = config["GEMINI_API_KEY"] ?? throw new Exception("GEMINI_API_KEY não configurada.");
     }
 
     public async Task<string> GenerateAsync(string prompt)
     {
-        _http.DefaultRequestHeaders.Clear();
-        _http.DefaultRequestHeaders.Add("x-goog-api-key", _apiKey);
-
-        var url =
-            $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+        var url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
         var body = new
         {
@@ -35,9 +32,12 @@ public class GeminiService
         };
 
         var json = JsonSerializer.Serialize(body);
-        var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 
-        var response = await _http.PostAsync(url, content);
+        using var request = new HttpRequestMessage(HttpMethod.Post, url);
+        request.Headers.Add("x-goog-api-key", _apiKey);
+        request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _http.SendAsync(request);
         response.EnsureSuccessStatusCode();
 
         var data = await response.Content.ReadFromJsonAsync<GeminiResponse>();

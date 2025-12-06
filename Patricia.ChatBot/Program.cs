@@ -15,7 +15,7 @@ namespace Patricia.ChatBot
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddSingleton<GeminiService>();
+            builder.Services.AddHttpClient<GeminiService>();
             builder.Services.AddSingleton<DatasetService>();
 
             builder.Services.AddDbContext<AppDbContext>(opt =>
