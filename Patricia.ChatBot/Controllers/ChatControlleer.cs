@@ -1,7 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Patricia.ChatBot.Entity;
 using Patricia.ChatBot.Services;
+using System.Text.Json;
 
 namespace Patricia.ChatBot.Controllers;
+
+public class PagedResponse<T>
+{
+    public List<T> Content { get; set; }
+    public int Number { get; set; }
+    public int Size { get; set; }
+    public int TotalElements { get; set; }
+    public int TotalPages { get; set; }
+}
 
 [ApiController]
 [Route("chat")]
@@ -32,21 +43,49 @@ public class ChatController : ControllerBase
         Abaixo está o dataset. Use somente ele para responder.
         """;
 
-        string dataset = await _dataset.CombineAllAsync();
+        try
+        {
+            using var client = new HttpClient();
 
-        string finalPrompt = $"""
-        {systemPrompt}
+            var url = "http://hackathon-project-alb-hackathon-1539304958.us-west-2.elb.amazonaws.com/api/java/knowledgebase";
 
-        [D A T A S E T]
-        {dataset}
+            var response = await client.GetAsync(url);
+            if (!response.IsSuccessStatusCode)
+                return StatusCode(500, new { error = "Enfim o java deu problema." });
 
-        [U S U Á R I O]
-        {req.Message}
-        """;
+            var json = await response.Content.ReadAsStringAsync();
 
-        string result = await _gemini.GenerateAsync(finalPrompt);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
 
-        return Ok(new { response = result });
+            var listKnowledge = JsonSerializer.Deserialize<PagedResponse<KnowledgeBaseEntity>>(json, options);
+
+            var dataset = string.Join("\n",
+                listKnowledge.Content.Select(k =>
+                    $"Id: {k.Id}; Titulo: {k.Titulo}; Pergunta: {k.Pergunta}; Resposta: {k.Resposta}; Categoria: {k.Categoria}"
+                )
+            );
+
+            string finalPrompt = $"""
+            {systemPrompt}
+
+            [D A T A S E T]
+            {dataset}
+
+            [U S U Á R I O]
+            {req.Message}
+            """;
+
+            string result = await _gemini.GenerateAsync(finalPrompt);
+
+            return Ok(new { response = result });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 }
 
